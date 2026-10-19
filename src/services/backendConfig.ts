@@ -76,11 +76,13 @@ class BackendConfigService {
       };
     }
 
-    // Default to Local Demo Mode
+    // Default to user's live Render backend
+    const defaultRenderUrl = 'https://admin-feq0.onrender.com';
     return {
-      backendType: 'local_demo',
-      backendUrl: '',
-      isConnected: false,
+      backendType: 'custom_api',
+      backendUrl: (customUrl && customUrl.trim().length > 0) ? customUrl.trim().replace(/\/+$/, '') : defaultRenderUrl,
+      apiKey: import.meta.env.VITE_API_KEY || '',
+      isConnected: true,
     };
   }
 

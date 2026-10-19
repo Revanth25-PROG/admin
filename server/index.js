@@ -14,6 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'studyverse-db.json');
+const INITIAL_STATE_FILE = path.join(DATA_DIR, 'initialState.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -26,6 +27,14 @@ function readDb() {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       return JSON.parse(content);
+    }
+    // Automatically seed from initialState.json if present
+    if (fs.existsSync(INITIAL_STATE_FILE)) {
+      console.log('[Server] Initializing database from initialState.json...');
+      const initialContent = fs.readFileSync(INITIAL_STATE_FILE, 'utf-8');
+      const parsed = JSON.parse(initialContent);
+      writeDb(parsed);
+      return parsed;
     }
   } catch (err) {
     console.error('[DB Read Error]', err);
