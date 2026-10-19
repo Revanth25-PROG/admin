@@ -1,0 +1,25 @@
+{
+  "name": "studyverse-backend",
+  "version": "2.0.0",
+  "description": "Production REST API Backend for STUDYVERSE Academic Management & Exam Preparation Platform",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "keywords": [
+    "studyverse",
+    "appsc",
+    "exam-prep",
+    "backend",
+    "api"
+  ],
+  "author": "STUDYVERSE",
+  "license": "MIT"
+}

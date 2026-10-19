@@ -1,0 +1,102 @@
+import { useState, useEffect } from 'react';
+import { storageService } from '../services/storageService';
+import { StudyVerseState } from '../types';
+
+export function useStudyVerse() {
+  const [state, setState] = useState<StudyVerseState>(storageService.getState());
+
+  useEffect(() => {
+    const unsubscribe = storageService.subscribe((newState) => {
+      setState({ ...newState });
+    });
+    return () => unsubscribe();
+  }, []);
+
+  return {
+    state,
+    profile: state.profile,
+    subjects: state.subjects,
+    topics: state.topics,
+    subtopics: state.subtopics,
+    chatgptLinks: state.chatgptLinks,
+    practiceQuestions: state.practiceQuestions,
+    examSettings: state.examSettings,
+    plans: state.plans,
+    tasks: state.tasks,
+    resources: state.resources,
+    mockTests: state.mockTests,
+    testAttempts: state.testAttempts,
+    mainsPrompts: state.mainsPrompts,
+    revisions: state.revisions,
+    calendarEvents: state.calendarEvents,
+    availabilityRules: state.availabilityRules,
+    semesterInfo: state.semesterInfo,
+    bankQuestions: state.bankQuestions || [],
+    generationJobs: state.generationJobs || [],
+    testBlueprints: state.testBlueprints || [],
+    mistakeBook: state.mistakeBook || [],
+    isUsingSupabase: state.isUsingSupabase,
+
+    // Actions
+    updateProfile: storageService.updateProfile.bind(storageService),
+    updateAvailabilityRules: storageService.updateAvailabilityRules.bind(storageService),
+    updateSemesterInfo: storageService.updateSemesterInfo.bind(storageService),
+    updateExamSettings: storageService.updateExamSettings.bind(storageService),
+    saveSubject: storageService.saveSubject.bind(storageService),
+    deleteSubject: storageService.deleteSubject.bind(storageService),
+    savePlan: storageService.savePlan.bind(storageService),
+    deletePlan: storageService.deletePlan.bind(storageService),
+    duplicatePlan: storageService.duplicatePlan.bind(storageService),
+    saveTopic: storageService.saveTopic.bind(storageService),
+    deleteTopic: storageService.deleteTopic.bind(storageService),
+    updateTopicStatus: storageService.updateTopicStatus.bind(storageService),
+    updateTopicDetails: storageService.updateTopicDetails.bind(storageService),
+    addTaskFromTopic: storageService.addTaskFromTopic.bind(storageService),
+    saveSubtopic: storageService.saveSubtopic.bind(storageService),
+    deleteSubtopic: storageService.deleteSubtopic.bind(storageService),
+    toggleSubtopicCompletion: storageService.toggleSubtopicCompletion.bind(storageService),
+    saveChatGPTLink: storageService.saveChatGPTLink.bind(storageService),
+    deleteChatGPTLink: storageService.deleteChatGPTLink.bind(storageService),
+    savePracticeQuestion: storageService.savePracticeQuestion.bind(storageService),
+    deletePracticeQuestion: storageService.deletePracticeQuestion.bind(storageService),
+    recordQuestionAttempt: storageService.recordQuestionAttempt.bind(storageService),
+    toggleQuestionBookmark: storageService.toggleQuestionBookmark.bind(storageService),
+    saveTask: storageService.saveTask.bind(storageService),
+    toggleTaskCompletion: storageService.toggleTaskCompletion.bind(storageService),
+    deleteTask: storageService.deleteTask.bind(storageService),
+    moveTaskDate: storageService.moveTaskDate.bind(storageService),
+    addGeneratedTasks: storageService.addGeneratedTasks.bind(storageService),
+    saveResource: storageService.saveResource.bind(storageService),
+    deleteResource: storageService.deleteResource.bind(storageService),
+    attachResourceToTopic: storageService.attachResourceToTopic.bind(storageService),
+    detachResourceFromTopic: storageService.detachResourceFromTopic.bind(storageService),
+    toggleBookmark: storageService.toggleBookmark.bind(storageService),
+    recordResourceOpened: storageService.recordResourceOpened.bind(storageService),
+    saveMockTest: storageService.saveMockTest.bind(storageService),
+    saveTestAttempt: storageService.saveTestAttempt.bind(storageService),
+    saveRevisionItem: storageService.saveRevisionItem.bind(storageService),
+    completeRevisionItem: storageService.completeRevisionItem.bind(storageService),
+    saveMainsPrompt: storageService.saveMainsPrompt.bind(storageService),
+    saveCalendarEvent: storageService.saveCalendarEvent.bind(storageService),
+    deleteCalendarEvent: storageService.deleteCalendarEvent.bind(storageService),
+    saveBankQuestion: storageService.saveBankQuestion.bind(storageService),
+    saveBankQuestions: storageService.saveBankQuestions.bind(storageService),
+    deleteBankQuestion: storageService.deleteBankQuestion.bind(storageService),
+    bulkApproveQuestions: storageService.bulkApproveQuestions.bind(storageService),
+    bulkRejectQuestions: storageService.bulkRejectQuestions.bind(storageService),
+    saveGenerationJob: storageService.saveGenerationJob.bind(storageService),
+    updateGenerationJob: storageService.updateGenerationJob.bind(storageService),
+    saveTestBlueprint: storageService.saveTestBlueprint.bind(storageService),
+    deleteTestBlueprint: storageService.deleteTestBlueprint.bind(storageService),
+    updateTopicQuestionTarget: storageService.updateTopicQuestionTarget.bind(storageService),
+    saveMistakeBookItem: storageService.saveMistakeBookItem.bind(storageService),
+    deleteMistakeBookItem: storageService.deleteMistakeBookItem.bind(storageService),
+    updateMistakeItemClassification: storageService.updateMistakeItemClassification.bind(storageService),
+    resetToSampleData: storageService.resetToSampleData.bind(storageService),
+    clearAllUserData: storageService.clearAllUserData.bind(storageService),
+    exportDataAsJson: storageService.exportDataAsJson.bind(storageService),
+    importDataFromJson: storageService.importDataFromJson.bind(storageService),
+    pushToRemote: storageService.pushToRemote.bind(storageService),
+    pullFromRemote: storageService.pullFromRemote.bind(storageService),
+  };
+}

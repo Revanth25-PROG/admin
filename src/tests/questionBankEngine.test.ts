@@ -1,0 +1,257 @@
+import { describe, it, expect } from 'vitest';
+import {
+  calculateTopicTargetStats,
+  calculateSubjectTargetStats,
+  validateQuestion,
+  generateQuestionFingerprint,
+  generateQuestionBatch,
+} from '../services/questionBankEngine';
+import {
+  assembleTestFromBlueprint,
+  createRetryTestForIncorrect,
+  evaluateTestAttempt,
+} from '../services/mockTestEngine';
+import { BankQuestionItem, TestBlueprint } from '../types/questionBank';
+import { SyllabusTopic, MockTest, TestAttempt } from '../types';
+
+describe('Question Bank Engine & 500-Target Tracking', () => {
+  const sampleTopic: SyllabusTopic = {
+    id: 'top-test-1',
+    subjectId: 'sub-test-1',
+    track: 'appsc-prelims',
+    title: 'Indus Valley Civilization',
+    estimatedHours: 4,
+    difficulty: 'moderate',
+    priority: 'high',
+    status: 'in_progress',
+    progressPercent: 30,
+    targetQuestionCount: 500,
+  };
+
+  const sampleQuestions: BankQuestionItem[] = [
+    {
+      id: 'bq-1',
+      examTrack: 'appsc-prelims',
+      subjectId: 'sub-test-1',
+      topicId: 'top-test-1',
+      questionType: 'single_correct',
+      questionText: 'Which site is famous for the Great Bath in Indus Valley Civilization?',
+      options: [
+        { id: 'opt-1', text: 'Mohenjo-daro' },
+        { id: 'opt-2', text: 'Harappa' },
+        { id: 'opt-3', text: 'Lothal' },
+        { id: 'opt-4', text: 'Kalibangan' },
+      ],
+      correctAnswer: 'opt-1',
+      explanation: 'The Great Bath was excavated at Mohenjo-daro.',
+      difficulty: 'easy',
+      language: 'en',
+      marks: 1.0,
+      negativeMarks: 0.33,
+      sourceType: 'standard_book',
+      validationStatus: 'approved',
+      publicationStatus: 'published',
+      createdAt: '2026-10-18T00:00:00Z',
+      updatedAt: '2026-10-18T00:00:00Z',
+    },
+    {
+      id: 'bq-2',
+      examTrack: 'appsc-prelims',
+      subjectId: 'sub-test-1',
+      topicId: 'top-test-1',
+      questionType: 'single_correct',
+      questionText: 'Which Indus Valley site has dockyard evidence?',
+      options: [
+        { id: 'opt-1', text: 'Lothal' },
+        { id: 'opt-2', text: 'Ropar' },
+      ],
+      correctAnswer: 'opt-1',
+      explanation: 'Lothal in Gujarat is the premier tidal dockyard.',
+      difficulty: 'moderate',
+      language: 'en',
+      marks: 1.0,
+      negativeMarks: 0.33,
+      sourceType: 'standard_book',
+      validationStatus: 'pending_review',
+      publicationStatus: 'draft',
+      createdAt: '2026-10-18T00:00:00Z',
+      updatedAt: '2026-10-18T00:00:00Z',
+    },
+    {
+      id: 'bq-3',
+      examTrack: 'appsc-prelims',
+      subjectId: 'sub-test-1',
+      topicId: 'top-test-1',
+      questionType: 'single_correct',
+      questionText: 'Invalid question without explanation',
+      options: [
+        { id: 'opt-1', text: 'A' },
+        { id: 'opt-2', text: 'B' },
+      ],
+      correctAnswer: 'opt-1',
+      explanation: '',
+      difficulty: 'difficult',
+      language: 'en',
+      marks: 1.0,
+      negativeMarks: 0.33,
+      sourceType: 'ai_generated',
+      validationStatus: 'rejected',
+      publicationStatus: 'draft',
+      createdAt: '2026-10-18T00:00:00Z',
+      updatedAt: '2026-10-18T00:00:00Z',
+    },
+  ];
+
+  it('calculates topic 500-target metrics correctly', () => {
+    const stats = calculateTopicTargetStats(sampleTopic, sampleQuestions);
+
+    expect(stats.targetCount).toBe(500);
+    expect(stats.approvedCount).toBe(1);
+    expect(stats.pendingReviewCount).toBe(1);
+    expect(stats.rejectedCount).toBe(1);
+    expect(stats.remainingTarget).toBe(499); // 500 - 1 approved
+    expect(stats.coveragePercent).toBe(0); // Math.round((1 / 500) * 100) = 0%
+  });
+
+  it('calculates subject aggregated coverage statistics correctly', () => {
+    const stats = calculateSubjectTargetStats('sub-test-1', [sampleTopic], sampleQuestions);
+
+    expect(stats.subjectId).toBe('sub-test-1');
+    expect(stats.totalTarget).toBe(500);
+    expect(stats.totalApproved).toBe(1);
+    expect(stats.totalPending).toBe(1);
+    expect(stats.totalRejected).toBe(1);
+  });
+
+  it('validates question quality and detects duplicate fingerprints', () => {
+    const duplicateQuestion: BankQuestionItem = {
+      ...sampleQuestions[0],
+      id: 'bq-dup-99',
+      questionText: 'Which site is famous for the Great Bath in Indus Valley Civilization?',
+    };
+
+    const validation = validateQuestion(duplicateQuestion, sampleQuestions);
+    expect(validation.isDuplicate).toBe(true);
+    expect(validation.duplicateQuestionId).toBe('bq-1');
+  });
+
+  it('generates a question batch grounded in syllabus topic with 10 questions', () => {
+    const batch = generateQuestionBatch(
+      'sub-test-1',
+      'top-test-1',
+      'Indus Valley Civilization',
+      10,
+      'moderate'
+    );
+
+    expect(batch.length).toBe(10);
+    batch.forEach((q) => {
+      expect(q.subjectId).toBe('sub-test-1');
+      expect(q.topicId).toBe('top-test-1');
+      expect(q.options.length).toBeGreaterThanOrEqual(2);
+      expect(q.correctAnswer).toBeDefined();
+      expect(q.explanation.length).toBeGreaterThan(10);
+    });
+  });
+});
+
+describe('Blueprint Test Assembler & Retry Engine', () => {
+  const sampleBank: BankQuestionItem[] = Array.from({ length: 30 }).map((_, i) => ({
+    id: `bank-q-${i + 1}`,
+    examTrack: 'appsc-prelims',
+    subjectId: 'sub-test-1',
+    topicId: `top-${(i % 3) + 1}`,
+    questionType: 'single_correct',
+    questionText: `Sample question statement #${i + 1}`,
+    options: [
+      { id: 'opt-1', text: 'Option 1' },
+      { id: 'opt-2', text: 'Option 2' },
+      { id: 'opt-3', text: 'Option 3' },
+      { id: 'opt-4', text: 'Option 4' },
+    ],
+    correctAnswer: 'opt-1',
+    explanation: `Explanation for question #${i + 1}`,
+    difficulty: i < 6 ? 'easy' : i < 18 ? 'moderate' : 'difficult',
+    language: 'en',
+    marks: 1.0,
+    negativeMarks: 0.33,
+    sourceType: 'standard_book',
+    validationStatus: 'approved',
+    publicationStatus: 'published',
+    createdAt: '2026-10-18T00:00:00Z',
+    updatedAt: '2026-10-18T00:00:00Z',
+  }));
+
+  const sampleBlueprint: TestBlueprint = {
+    id: 'bp-prelims-test',
+    title: 'APPSC Group 2 Prelims Practice Simulation',
+    description: 'Sectional test from question bank',
+    examTrack: 'appsc-prelims',
+    mode: 'subject_mock',
+    subjectIds: ['sub-test-1'],
+    topicIds: [],
+    questionCount: 15,
+    durationMinutes: 15,
+    marksPerQuestion: 1.0,
+    negativeMarks: 0.33,
+    difficultyDistribution: {
+      easy: 20,
+      moderate: 50,
+      difficult: 30,
+      very_difficult: 0,
+      exam_tricky: 0,
+    },
+    questionTypes: ['single_correct'],
+    shuffleQuestions: true,
+    shuffleOptions: true,
+    allowReviewAnswers: true,
+    createdAt: '2026-10-18T00:00:00Z',
+  };
+
+  it('assembles a test adhering to blueprint quota and negative marking', () => {
+    const { test } = assembleTestFromBlueprint(sampleBlueprint, sampleBank);
+
+    expect(test.title).toBe(sampleBlueprint.title);
+    expect(test.questions.length).toBe(15);
+    expect(test.durationMinutes).toBe(15);
+    expect(test.marksPerQuestion).toBe(1.0);
+    expect(test.negativeMarks).toBe(0.33);
+    expect(test.totalMarks).toBe(15);
+  });
+
+  it('creates an instant retry test for missed/incorrect questions', () => {
+    const { test } = assembleTestFromBlueprint(sampleBlueprint, sampleBank);
+
+    // Simulate attempt where question 1 & 2 are wrong, question 3 is correct
+    const mockAttempt: TestAttempt = {
+      id: 'attempt-1',
+      testId: test.id,
+      testTitle: test.title,
+      track: 'appsc-prelims',
+      startedAt: '2026-10-18T10:00:00Z',
+      completedAt: '2026-10-18T10:15:00Z',
+      timeSpentSeconds: 600,
+      score: 0.34,
+      totalPossibleMarks: 15,
+      accuracy: 33.3,
+      correctCount: 1,
+      incorrectCount: 2,
+      unansweredCount: 12,
+      markedForReviewCount: 0,
+      answers: {
+        [test.questions[0].id]: { selectedOptionId: 'opt-2', isCorrect: false, isMarkedForReview: false, timeSpentSeconds: 30 },
+        [test.questions[1].id]: { selectedOptionId: 'opt-3', isCorrect: false, isMarkedForReview: false, timeSpentSeconds: 40 },
+        [test.questions[2].id]: { selectedOptionId: 'opt-1', isCorrect: true, isMarkedForReview: false, timeSpentSeconds: 20 },
+      },
+      suggestedRevisionTopicIds: [],
+    };
+
+    const retryTest = createRetryTestForIncorrect(mockAttempt, test);
+
+    expect(retryTest).not.toBeNull();
+    expect(retryTest?.questions.length).toBe(2);
+    expect(retryTest?.questions.map((q) => q.id)).toContain(test.questions[0].id);
+    expect(retryTest?.questions.map((q) => q.id)).toContain(test.questions[1].id);
+    expect(retryTest?.questions.map((q) => q.id)).not.toContain(test.questions[2].id);
+  });
+});
