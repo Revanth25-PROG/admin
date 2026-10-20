@@ -2,22 +2,22 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  CalendarClock,
-  BookOpen,
+  CheckSquare,
   Award,
-  GraduationCap,
-  FileText,
+  PenTool,
+  BarChart3,
+  CalendarClock,
   Settings,
 } from 'lucide-react';
 
 export const BottomNav: React.FC = () => {
   const items = [
     { to: '/', label: 'Home', icon: <LayoutDashboard size={18} /> },
-    { to: '/timetable', label: 'Schedule', icon: <CalendarClock size={18} /> },
-    { to: '/plans', label: 'Plans', icon: <BookOpen size={18} /> },
     { to: '/appsc', label: 'APPSC', icon: <Award size={18} /> },
-    { to: '/semester', label: 'Semester', icon: <GraduationCap size={18} /> },
-    { to: '/resources', label: 'Notes', icon: <FileText size={18} /> },
+    { to: '/mock-tests', label: 'Mocks', icon: <CheckSquare size={18} /> },
+    { to: '/mains', label: 'Mains', icon: <PenTool size={18} /> },
+    { to: '/analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
+    { to: '/timetable', label: 'Schedule', icon: <CalendarClock size={18} /> },
     { to: '/settings', label: 'Settings', icon: <Settings size={18} /> },
   ];
 

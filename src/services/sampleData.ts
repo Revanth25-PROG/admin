@@ -8,10 +8,16 @@ import {
   INITIAL_PRACTICE_QUESTIONS,
 } from './syllabusDatabase';
 import {
+  APPSC_NINE_SUBJECTS,
+  generateNineSubjectTopics,
+} from './appscNineSubjects';
+import {
   INITIAL_BANK_QUESTIONS,
   INITIAL_GENERATION_JOBS,
   INITIAL_TEST_BLUEPRINTS,
 } from './sampleQuestionBank';
+
+const nineSubjectData = generateNineSubjectTopics();
 
 export const INITIAL_SAMPLE_DATA: StudyVerseState = {
   profile: {
@@ -60,6 +66,11 @@ export const INITIAL_SAMPLE_DATA: StudyVerseState = {
   },
 
   subjects: [
+    // ----------------------------------------------------
+    // APPSC OFFICIAL NINE SUBJECT GROUPS (Section 4)
+    // ----------------------------------------------------
+    ...APPSC_NINE_SUBJECTS,
+
     // ----------------------------------------------------
     // APPSC GROUP 2 PRELIMS (5 MAIN SUBJECT GROUPS - 150 TOPICS)
     // ----------------------------------------------------
@@ -185,6 +196,11 @@ export const INITIAL_SAMPLE_DATA: StudyVerseState = {
   ],
 
   topics: [
+    // ==========================================
+    // APPSC OFFICIAL NINE SUBJECT TOPICS (Section 4)
+    // ==========================================
+    ...nineSubjectData.topics,
+
     // ==========================================
     // APPSC PRELIMS TOPICS (5 SUBJECT GROUPS x 30 TOPICS = 150 TOPICS)
     // ==========================================
@@ -1571,7 +1587,7 @@ NSIL & Commercial Footprint:
     },
   ],
 
-  subtopics: INITIAL_SUBTOPICS,
+  subtopics: [...nineSubjectData.subtopics, ...INITIAL_SUBTOPICS],
   chatgptLinks: INITIAL_CHATGPT_LINKS,
   practiceQuestions: INITIAL_PRACTICE_QUESTIONS,
 

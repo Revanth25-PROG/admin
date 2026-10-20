@@ -490,3 +490,276 @@ export function getSampleCsvTemplate(): string {
 "Who among the following was the founder of the Satavahana dynasty?","Simuka","Satakarni I","Gautamiputra Satakarni","Yajna Sri Satakarni","opt-1","easy","Simuka founded the Satavahana dynasty around 230 BCE in the Deccan region.",1.0,0.33
 "Consider the following statements regarding the Preamble to the Constitution of India: 1. It is non-justiciable. 2. It can be amended under Article 368.","1 only","2 only","Both 1 and 2","Neither 1 nor 2","opt-3","difficult","In Kesavananda Bharati (1973), the Supreme Court ruled the Preamble can be amended without altering the Basic Structure, and it is non-justiciable.",1.0,0.33`;
 }
+
+/**
+ * Returns a sample Python quiz list template matching the prompt's specification contract
+ */
+export function getSamplePythonTemplate(): string {
+  return `quiz = [
+    {
+        "id": "HIST-MUG-0001",
+        "q": "Mughal Empire founder evaru?",
+        "options": [
+            "A) Akbar",
+            "B) Babur",
+            "C) Humayun",
+            "D) Shah Jahan"
+        ],
+        "ans": "B",
+        "explanation": "Babur established Mughal rule in India after defeating Ibrahim Lodi at the First Battle of Panipat in 1526.",
+        "subject": "Indian History",
+        "topic": "Medieval Indian History",
+        "subtopic": "Mughal Empire",
+        "difficulty": "easy",
+        "exam_stage": "prelims",
+        "marks": 1,
+        "negative_marks": 0.33,
+        "source_reference": "Telugu Akademi Indian History",
+        "tags": ["Babur", "First Battle of Panipat"]
+    },
+    {
+        "id": "POL-PRE-0002",
+        "q": "Which Article of the Indian Constitution empowers High Courts to issue writs for the enforcement of Fundamental Rights and for other purposes?",
+        "options": [
+            "A) Article 32",
+            "B) Article 131",
+            "C) Article 226",
+            "D) Article 143"
+        ],
+        "ans": "C",
+        "explanation": "Article 226 empowers High Courts to issue writs (Habeas Corpus, Mandamus, Prohibition, Quo Warranto, Certiorari) for fundamental rights and any other legal purpose.",
+        "subject": "Indian Polity and Governance",
+        "topic": "Supreme Court and High Courts",
+        "subtopic": "High Court Writ Jurisdiction",
+        "difficulty": "moderate",
+        "exam_stage": "prelims",
+        "marks": 1,
+        "negative_marks": 0.33,
+        "source_reference": "Constitution of India Bare Act",
+        "tags": ["Writs", "Article 226", "High Court"]
+    }
+]`;
+}
+
+/**
+ * Exports questions into the Python quiz list format specified in Section 6
+ */
+export function exportQuestionsToPython(questions: BankQuestionItem[]): string {
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+  const quizItems = questions.map((q) => {
+    // Find correct letter (A, B, C, D)
+    let ansLetter = 'A';
+    const optList: string[] = [];
+
+    q.options.forEach((opt, idx) => {
+      const letter = letters[idx] || `Opt${idx + 1}`;
+      optList.push(`${letter}) ${opt.text}`);
+      if (opt.id === q.correctAnswer || (Array.isArray(q.correctAnswer) && q.correctAnswer.includes(opt.id))) {
+        ansLetter = letter;
+      }
+    });
+
+    return {
+      id: q.id,
+      q: q.questionText,
+      options: optList,
+      ans: ansLetter,
+      explanation: q.explanation || 'Verified study explanation.',
+      subject: q.subjectId || 'Indian History',
+      topic: q.topicId || 'General',
+      subtopic: q.subtopicId || 'Overview',
+      difficulty: q.difficulty || 'moderate',
+      exam_stage: q.examTrack === 'appsc-mains' ? 'mains' : 'prelims',
+      marks: q.marks || 1,
+      negative_marks: q.negativeMarks || 0.33,
+      source_reference: q.sourceReference || 'Standard Telugu Akademi / PYQ Reference',
+      tags: q.keywords || [],
+    };
+  });
+
+  return `# APPSC STUDYVERSE - Python Quiz List Export
+# Machine-readable format compliant with Section 6 of Examination Specification
+
+quiz = ${JSON.stringify(quizItems, null, 4)}
+`;
+}
+
+/**
+ * Parses Python-compatible quiz list string (e.g. `quiz = [...]` or python list of dicts)
+ */
+export function parseQuestionsFromPython(
+  pythonStr: string,
+  targetTopicId?: string,
+  targetSubjectId?: string,
+  existingQuestions: BankQuestionItem[] = []
+): { questions: BankQuestionItem[]; errors: string[]; duplicateCount: number } {
+  const errors: string[] = [];
+  let duplicateCount = 0;
+
+  if (!pythonStr || pythonStr.trim().length === 0) {
+    return { questions: [], errors: ['Python input cannot be empty.'], duplicateCount: 0 };
+  }
+
+  // 1. Sanitize Python string to valid JSON
+  let cleaned = pythonStr
+    // Remove python comments (# ...)
+    .replace(/#.*$/gm, '')
+    // Remove leading variable assignment: e.g. quiz = [ or questions = [
+    .replace(/^\s*(?:quiz|questions|test_bank|data)\s*=\s*/i, '')
+    .trim();
+
+  // If ends with a trailing semicolon, remove it
+  if (cleaned.endsWith(';')) {
+    cleaned = cleaned.slice(0, -1).trim();
+  }
+
+  // Convert Python literals: True -> true, False -> false, None -> null
+  cleaned = cleaned
+    .replace(/:\s*True\b/g, ': true')
+    .replace(/:\s*False\b/g, ': false')
+    .replace(/:\s*None\b/g, ': null');
+
+  // Convert single quotes to double quotes safely
+  cleaned = cleaned
+    .replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (match, content) => {
+      // Escape unescaped double quotes inside content
+      const escaped = content.replace(/"/g, '\\"');
+      return `"${escaped}"`;
+    });
+
+  // Remove trailing commas before } or ]
+  cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+
+  let rawList: any[] = [];
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed)) {
+      rawList = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+      rawList = [parsed];
+    } else {
+      errors.push('Parsed Python content is not an array of question dictionaries.');
+    }
+  } catch (err: any) {
+    // Fallback: Attempt regex block extraction for each dictionary
+    const dictRegex = /\{[\s\S]*?\}(?=\s*,\s*\{|\s*\]|\s*$)/g;
+    const matches = cleaned.match(dictRegex);
+
+    if (matches && matches.length > 0) {
+      matches.forEach((mStr, idx) => {
+        try {
+          const item = JSON.parse(mStr);
+          rawList.push(item);
+        } catch {
+          errors.push(`Could not parse question dictionary #${idx + 1}. Check quotes or syntax.`);
+        }
+      });
+    } else {
+      return {
+        questions: [],
+        errors: [`Syntax error parsing Python quiz: ${err.message}. Please check quotation marks and commas.`],
+        duplicateCount: 0,
+      };
+    }
+  }
+
+  const validatedQuestions: BankQuestionItem[] = [];
+  const existingFingerprints = new Set(
+    existingQuestions.map((eq) => eq.questionFingerprint || generateQuestionFingerprint(eq.questionText, eq.options))
+  );
+
+  rawList.forEach((item, index) => {
+    const rowNum = index + 1;
+    const qText = item.q || item.question || item.question_text || item.questionText || '';
+
+    if (!qText || typeof qText !== 'string' || qText.trim().length < 5) {
+      errors.push(`Item ${rowNum}: Question text ('q') is missing or too short.`);
+      return;
+    }
+
+    // Parse options
+    const rawOpts = item.options || item.choices || [];
+    let optionObjects: { id: string; text: string }[] = [];
+
+    if (Array.isArray(rawOpts)) {
+      optionObjects = rawOpts.map((optStr, optIdx) => {
+        const strVal = typeof optStr === 'string' ? optStr : String(optStr);
+        // Clean off leading "A) ", "B) ", "1. ", etc.
+        const cleanedText = strVal.replace(/^[A-Da-d1-4][\)\.\:\-]\s*/, '').trim();
+        return {
+          id: `opt-${optIdx + 1}`,
+          text: cleanedText || strVal,
+        };
+      });
+    }
+
+    if (optionObjects.length < 2) {
+      errors.push(`Item ${rowNum}: Needs at least 2 options (found ${optionObjects.length}).`);
+      return;
+    }
+
+    // Determine correct answer option ID
+    const rawAns = String(item.ans || item.answer || item.correct_answer || 'A').trim().toUpperCase();
+    let correctOptId = 'opt-1';
+
+    if (rawAns.startsWith('A') || rawAns === '1' || rawAns === '0') {
+      correctOptId = 'opt-1';
+    } else if (rawAns.startsWith('B') || rawAns === '2' || rawAns === '1') {
+      correctOptId = 'opt-2';
+    } else if (rawAns.startsWith('C') || rawAns === '3' || rawAns === '2') {
+      correctOptId = optionObjects.length >= 3 ? 'opt-3' : 'opt-1';
+    } else if (rawAns.startsWith('D') || rawAns === '4' || rawAns === '3') {
+      correctOptId = optionObjects.length >= 4 ? 'opt-4' : 'opt-1';
+    } else {
+      // Check if text matches option text
+      const matched = optionObjects.find(
+        (o) => o.text.toLowerCase().trim() === rawAns.toLowerCase()
+      );
+      if (matched) {
+        correctOptId = matched.id;
+      }
+    }
+
+    const fingerprint = generateQuestionFingerprint(qText, optionObjects);
+
+    if (existingFingerprints.has(fingerprint)) {
+      duplicateCount++;
+    }
+
+    const questionItem: BankQuestionItem = {
+      id: item.id || `bq-py-${Date.now()}-${index}`,
+      examTrack: item.exam_stage === 'mains' ? 'appsc-mains' : 'appsc-prelims',
+      subjectId: targetSubjectId || item.subject_id || item.subject || 'sub-appsc-1',
+      topicId: targetTopicId || item.topic_id || item.topic || 'top-ih-1',
+      subtopicId: item.subtopic_id || item.subtopic,
+      questionType: 'single_correct',
+      questionText: qText.trim(),
+      options: optionObjects,
+      correctAnswer: correctOptId,
+      explanation: item.explanation || 'Verified study explanation.',
+      difficulty: (['easy', 'moderate', 'difficult', 'very_difficult', 'exam_tricky'].includes(item.difficulty)
+        ? item.difficulty
+        : 'moderate') as QuestionDifficulty,
+      language: 'en',
+      marks: Number(item.marks) || 1.0,
+      negativeMarks: Number(item.negative_marks) !== undefined ? Number(item.negative_marks) : 0.33,
+      sourceType: 'standard_book',
+      sourceReference: item.source_reference || 'Python Question Import',
+      keywords: Array.isArray(item.tags) ? item.tags : [item.subject || 'APPSC'],
+      questionFingerprint: fingerprint,
+      validationStatus: 'approved',
+      publicationStatus: 'published',
+      attemptCount: 0,
+      correctAttemptCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    validatedQuestions.push(questionItem);
+    existingFingerprints.add(fingerprint);
+  });
+
+  return { questions: validatedQuestions, errors, duplicateCount };
+}

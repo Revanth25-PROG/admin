@@ -1218,15 +1218,25 @@ export const MockTestsPage: React.FC = () => {
                       {t.isCustom ? 'Custom Test' : 'Official Syllabus'}
                     </span>
 
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<Play size={14} />}
-                      onClick={() => handleStartTest(t)}
-                      className="font-bold text-xs"
-                    >
-                      Enter Exam Room
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/exam/${t.id}`)}
+                        className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10 text-xs"
+                      >
+                        Exam Room
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={<Play size={14} />}
+                        onClick={() => handleStartTest(t)}
+                        className="font-bold text-xs"
+                      >
+                        Start Test
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

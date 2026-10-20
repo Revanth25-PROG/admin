@@ -264,6 +264,7 @@ export interface MockTest {
   paper?: string;
   subjectId?: string;
   isCustom: boolean;
+  isBlueprintGenerated?: boolean;
   durationMinutes: number;
   totalMarks: number;
   marksPerQuestion: number;

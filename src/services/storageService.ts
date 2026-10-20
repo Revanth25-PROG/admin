@@ -48,9 +48,33 @@ class StorageService {
         if (stored) {
           const parsed = JSON.parse(stored);
           // Ensure all required fields exist
+          const mergedSubjects = [...(parsed.subjects || [])];
+          INITIAL_SAMPLE_DATA.subjects.forEach((s) => {
+            if (!mergedSubjects.some((x) => x.id === s.id)) {
+              mergedSubjects.push(s);
+            }
+          });
+
+          const mergedTopics = [...(parsed.topics || [])];
+          INITIAL_SAMPLE_DATA.topics.forEach((t) => {
+            if (!mergedTopics.some((x) => x.id === t.id)) {
+              mergedTopics.push(t);
+            }
+          });
+
+          const mergedSubtopics = [...(parsed.subtopics || [])];
+          INITIAL_SAMPLE_DATA.subtopics.forEach((st) => {
+            if (!mergedSubtopics.some((x) => x.id === st.id)) {
+              mergedSubtopics.push(st);
+            }
+          });
+
           return {
             ...INITIAL_SAMPLE_DATA,
             ...parsed,
+            subjects: mergedSubjects,
+            topics: mergedTopics,
+            subtopics: mergedSubtopics,
             bankQuestions: parsed.bankQuestions && parsed.bankQuestions.length > 0 ? parsed.bankQuestions : INITIAL_SAMPLE_DATA.bankQuestions,
             generationJobs: parsed.generationJobs && parsed.generationJobs.length > 0 ? parsed.generationJobs : INITIAL_SAMPLE_DATA.generationJobs,
             testBlueprints: parsed.testBlueprints && parsed.testBlueprints.length > 0 ? parsed.testBlueprints : INITIAL_SAMPLE_DATA.testBlueprints,

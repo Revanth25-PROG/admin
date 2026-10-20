@@ -14,6 +14,16 @@ import { CalendarPage } from '../features/calendar/CalendarPage';
 import { AnalyticsPage } from '../features/analytics/AnalyticsPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { TopicDetailPage } from '../features/topics/TopicDetailPage';
+import { SubjectDetailPage } from '../features/subjects/SubjectDetailPage';
+import { MainsWorkspacePage } from '../features/mains/MainsWorkspacePage';
+import { MistakeBookPage } from '../features/mistakes/MistakeBookPage';
+import { CurrentAffairsPage } from '../features/current-affairs/CurrentAffairsPage';
+import { TestHistoryPage } from '../features/history/TestHistoryPage';
+import { AdminQuestionBankPage } from '../features/admin/AdminQuestionBankPage';
+import { AdminMockInventoryPage } from '../features/admin/AdminMockInventoryPage';
+import { LoginPage } from '../features/auth/LoginPage';
+import { LiveExamPage } from '../features/exam/LiveExamPage';
+import { TestConfigPage } from '../features/mock-tests/TestConfigPage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -27,12 +37,22 @@ export const AppRoutes: React.FC = () => {
           <Route path="semester" element={<SemesterPage />} />
           <Route path="syllabus" element={<SyllabusPage />} />
           <Route path="topics/:topicId" element={<TopicDetailPage />} />
+          <Route path="subjects/:subjectId" element={<SubjectDetailPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="mock-tests" element={<MockTestsPage />} />
+          <Route path="mock-tests/configure" element={<TestConfigPage />} />
+          <Route path="exam/:testId" element={<LiveExamPage />} />
+          <Route path="mains" element={<MainsWorkspacePage />} />
+          <Route path="mistakes" element={<MistakeBookPage />} />
+          <Route path="current-affairs" element={<CurrentAffairsPage />} />
+          <Route path="history" element={<TestHistoryPage />} />
           <Route path="revisions" element={<RevisionsPage />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="admin/question-bank" element={<AdminQuestionBankPage />} />
+          <Route path="admin/inventory" element={<AdminMockInventoryPage />} />
+          <Route path="login" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

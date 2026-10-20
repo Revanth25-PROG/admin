@@ -589,6 +589,16 @@ export const AppscPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 flex-wrap">
                     <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Award size={14} />}
+                      onClick={() => navigate(`/subjects/${activeSemSubject.id}`)}
+                      className="border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10"
+                    >
+                      Subject Intelligence & Mocks
+                    </Button>
+
+                    <Button
                       variant="primary"
                       size="sm"
                       icon={<Plus size={14} />}

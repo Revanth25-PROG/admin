@@ -16,6 +16,11 @@ import {
   RefreshCw,
   Plus,
   BookOpen,
+  PenTool,
+  AlertOctagon,
+  Newspaper,
+  Sliders,
+  Boxes,
 } from 'lucide-react';
 import { useStudyVerse } from '../../hooks/useStudyVerse';
 import { Card, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -127,6 +132,75 @@ export const DashboardPage: React.FC = () => {
             </Button>
           )}
         </div>
+      </div>
+
+      {/* APPSC Studyverse Fast Launchpad */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <button
+          onClick={() => navigate('/appsc')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <Award size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-blue-300">9 Subjects</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">Official syllabus & mocks</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/mains')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-violet-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <PenTool size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-violet-300">Mains Lab</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">Word limits & rubrics</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/mistakes')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-rose-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <AlertOctagon size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-rose-300">Mistakes Book</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">Error root-cause & retry</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/current-affairs')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <Newspaper size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-amber-300">Current Affairs</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">AP & National takeaways</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/mock-tests/configure')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <Sliders size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-cyan-300">Test Blueprint</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">Stage & difficulty mixer</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/admin/inventory')}
+          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+            <Boxes size={18} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-emerald-300">Mock Inventory</span>
+          <span className="text-[10px] text-slate-400 mt-0.5">Ready, Draft, Targets</span>
+        </button>
       </div>
 
       {/* Metrics Row: 4 key stat cards */}

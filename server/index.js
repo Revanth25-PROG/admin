@@ -52,6 +52,9 @@ function readDb() {
     bankQuestions: [],
     revisions: [],
     calendarEvents: [],
+    mainsPrompts: [],
+    mainsDrafts: [],
+    currentAffairs: [],
     lastSyncedAt: new Date().toISOString(),
   };
 }
@@ -174,6 +177,9 @@ const collections = [
   'bankQuestions',
   'revisions',
   'calendarEvents',
+  'mainsPrompts',
+  'mainsDrafts',
+  'currentAffairs',
 ];
 
 collections.forEach((col) => {

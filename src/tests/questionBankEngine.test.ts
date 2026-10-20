@@ -5,6 +5,9 @@ import {
   validateQuestion,
   generateQuestionFingerprint,
   generateQuestionBatch,
+  exportQuestionsToPython,
+  parseQuestionsFromPython,
+  getSamplePythonTemplate,
 } from '../services/questionBankEngine';
 import {
   assembleTestFromBlueprint,
@@ -253,5 +256,58 @@ describe('Blueprint Test Assembler & Retry Engine', () => {
     expect(retryTest?.questions.map((q) => q.id)).toContain(test.questions[0].id);
     expect(retryTest?.questions.map((q) => q.id)).toContain(test.questions[1].id);
     expect(retryTest?.questions.map((q) => q.id)).not.toContain(test.questions[2].id);
+  });
+
+  it('exports and parses Python quiz list contracts accurately (Section 6 spec)', () => {
+    const pythonSnippet = `quiz = [
+    {
+        "id": "HIST-MUG-0001",
+        "q": "Mughal Empire founder evaru?",
+        "options": [
+            "A) Akbar",
+            "B) Babur",
+            "C) Humayun",
+            "D) Shah Jahan"
+        ],
+        "ans": "B",
+        "explanation": "Babur established Mughal rule in India after defeating Ibrahim Lodi at the First Battle of Panipat in 1526.",
+        "subject": "Indian History",
+        "topic": "Medieval Indian History",
+        "subtopic": "Mughal Empire",
+        "difficulty": "easy",
+        "exam_stage": "prelims",
+        "marks": 1,
+        "negative_marks": 0.33,
+        "source_reference": "Verified reference required",
+        "tags": ["Babur", "First Battle of Panipat"]
+    }
+]`;
+
+    const { questions, errors, duplicateCount } = parseQuestionsFromPython(pythonSnippet);
+
+    expect(errors.length).toBe(0);
+    expect(duplicateCount).toBe(0);
+    expect(questions.length).toBe(1);
+
+    const q = questions[0];
+    expect(q.id).toBe('HIST-MUG-0001');
+    expect(q.questionText).toBe('Mughal Empire founder evaru?');
+    expect(q.options.length).toBe(4);
+    expect(q.options[1].text).toBe('Babur');
+    expect(q.correctAnswer).toBe('opt-2'); // B maps to opt-2
+    expect(q.explanation).toContain('Babur established Mughal rule');
+    expect(q.difficulty).toBe('easy');
+    expect(q.marks).toBe(1);
+    expect(q.negativeMarks).toBe(0.33);
+
+    // Test Python Export round-trip
+    const exportedPython = exportQuestionsToPython(questions);
+    expect(exportedPython).toContain('quiz =');
+    expect(exportedPython).toContain('"q": "Mughal Empire founder evaru?"');
+    expect(exportedPython).toContain('"ans": "B"');
+
+    // Test duplicate detection when importing again
+    const reImport = parseQuestionsFromPython(pythonSnippet, undefined, undefined, questions);
+    expect(reImport.duplicateCount).toBe(1);
   });
 });
