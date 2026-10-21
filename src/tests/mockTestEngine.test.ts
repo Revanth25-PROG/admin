@@ -104,4 +104,27 @@ describe('Mock Test Engine (evaluateTestAttempt)', () => {
     expect(weakTopicIds.length).toBe(0);
     expect(feedbackNotes[0]).toContain('Excellent performance');
   });
+
+  it('correctly calculates 2 correct and 1 wrong with 1/3 negative marking (score: 1.67)', () => {
+    const submissions = {
+      'q-1': { questionId: 'q-1', selectedOptionId: 'opt-a', isMarkedForReview: false, timeSpentSeconds: 25 }, // correct (+1)
+      'q-2': { questionId: 'q-2', selectedOptionId: 'opt-c', isMarkedForReview: false, timeSpentSeconds: 35 }, // correct (+1)
+      'q-3': { questionId: 'q-3', selectedOptionId: 'opt-f', isMarkedForReview: false, timeSpentSeconds: 45 }, // wrong (-0.33)
+    };
+
+    const { attempt, weakTopicIds, negativeMarksLost } = evaluateTestAttempt(
+      mockTest,
+      submissions,
+      '2026-10-18T10:00:00Z',
+      '2026-10-18T10:05:00Z'
+    );
+
+    expect(attempt.correctCount).toBe(2);
+    expect(attempt.incorrectCount).toBe(1);
+    expect(attempt.unansweredCount).toBe(0);
+    expect(negativeMarksLost).toBeCloseTo(0.33, 2);
+    expect(attempt.score).toBe(1.67); // 2 - 0.33 = 1.67
+    expect(attempt.accuracy).toBeCloseTo(66.7, 1);
+    expect(weakTopicIds).toContain('top-polity-3');
+  });
 });

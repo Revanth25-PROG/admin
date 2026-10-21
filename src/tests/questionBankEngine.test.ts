@@ -8,6 +8,7 @@ import {
   exportQuestionsToPython,
   parseQuestionsFromPython,
   getSamplePythonTemplate,
+  validateAndReportMockTestsJson,
 } from '../services/questionBankEngine';
 import {
   assembleTestFromBlueprint,
@@ -309,5 +310,98 @@ describe('Blueprint Test Assembler & Retry Engine', () => {
     // Test duplicate detection when importing again
     const reImport = parseQuestionsFromPython(pythonSnippet, undefined, undefined, questions);
     expect(reImport.duplicateCount).toBe(1);
+  });
+
+  it('validates Section 5 JSON format, detects missing fields, verifies 4 options, and audits duplicate questions', () => {
+    const validJsonSample = `[
+      {
+        "id": "MUG001",
+        "q": "Which Mughal emperor instituted the Mansabdari system?",
+        "options": {
+          "A": "Babur",
+          "B": "Akbar",
+          "C": "Jahangir",
+          "D": "Shah Jahan"
+        },
+        "ans": "B",
+        "explanation": "Akbar introduced the Mansabdari system in 1571 CE.",
+        "subject": "Indian History",
+        "topic": "Mughal Empire",
+        "difficulty": "easy",
+        "marks": 1,
+        "negative_marks": 0.33
+      },
+      {
+        "id": "GEO001",
+        "q": "Which planet is known as the Earth's twin?",
+        "options": {
+          "A": "Mars",
+          "B": "Venus",
+          "C": "Mercury",
+          "D": "Jupiter"
+        },
+        "ans": "B",
+        "explanation": "Venus is often called Earth's twin because of similar size and density.",
+        "subject": "Geography",
+        "topic": "Solar System",
+        "difficulty": "easy",
+        "marks": 1,
+        "negative_marks": 0.33
+      }
+    ]`;
+
+    // Test valid report
+    const validReport = validateAndReportMockTestsJson(validJsonSample);
+    expect(validReport.isValid).toBe(true);
+    expect(validReport.totalParsed).toBe(2);
+    expect(validReport.validCount).toBe(2);
+    expect(validReport.invalidCount).toBe(0);
+    expect(validReport.uniqueIdsCount).toBe(2);
+    expect(validReport.duplicateIds.length).toBe(0);
+    expect(validReport.invalidOptionCounts.length).toBe(0);
+    expect(validReport.invalidAnswerKeys.length).toBe(0);
+    expect(validReport.missingFields.length).toBe(0);
+
+    // Verify parsed question attributes
+    const q1 = validReport.questions[0];
+    expect(q1.id).toBe('MUG001');
+    expect(q1.questionText).toContain('Mansabdari');
+    expect(q1.options.length).toBe(4);
+    expect(q1.correctAnswer).toBe('B');
+    expect(q1.negativeMarks).toBe(0.33);
+
+    // Test invalid JSON with duplicate ID, missing ans, and bad option count
+    const invalidJsonSample = `[
+      {
+        "id": "ERR001",
+        "q": "Invalid question with only 2 options and invalid ans",
+        "options": {
+          "A": "Option A",
+          "B": "Option B"
+        },
+        "ans": "Z",
+        "explanation": "Explanation here",
+        "subject": "Indian History"
+      },
+      {
+        "id": "ERR001",
+        "q": "Duplicate ID with missing explanation",
+        "options": {
+          "A": "A",
+          "B": "B",
+          "C": "C",
+          "D": "D"
+        },
+        "ans": "A",
+        "subject": "Indian History"
+      }
+    ]`;
+
+    const invalidReport = validateAndReportMockTestsJson(invalidJsonSample);
+    expect(invalidReport.isValid).toBe(false);
+    expect(invalidReport.duplicateIds).toContain('ERR001');
+    expect(invalidReport.invalidOptionCounts.some(o => o.id === 'ERR001')).toBe(true);
+    expect(invalidReport.invalidAnswerKeys.some(a => a.ans === 'Z')).toBe(true);
+    expect(invalidReport.missingExplanations.some(e => e.id === 'ERR001')).toBe(true);
   });
 });

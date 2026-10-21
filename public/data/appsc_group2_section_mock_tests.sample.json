@@ -1,0 +1,206 @@
+[
+  {
+    "id": "HIST_001",
+    "q": "Which inscription of Emperor Ashoka explicitly mentions his remorse over the Kalinga War?",
+    "options": {
+      "A": "Major Rock Edict VIII",
+      "B": "Major Rock Edict XIII",
+      "C": "Pillar Edict VII",
+      "D": "Bhabru Edict"
+    },
+    "ans": "B",
+    "explanation": "Major Rock Edict XIII gives a vivid account of the Kalinga War (261 BCE), recording the casualties and Ashoka's profound grief and conversion to Dhamma Vijaya.",
+    "subject": "Indian History",
+    "topic": "Mauryan Empire",
+    "difficulty": "moderate",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "HIST_002",
+    "q": "Who among the following was the founder of the Satavahana dynasty in the Deccan?",
+    "options": {
+      "A": "Gautamiputra Satakarni",
+      "B": "Simuka",
+      "C": "Satakarni I",
+      "D": "Yajna Sri Satakarni"
+    },
+    "ans": "B",
+    "explanation": "Simuka was the founder of the Satavahana dynasty after defeating the last Kanva king Susarman around late 1st century BCE.",
+    "subject": "Indian History",
+    "topic": "Ancient Indian History",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "GEO_001",
+    "q": "Through which of the following states does the Tropic of Cancer (23.5° N) NOT pass in India?",
+    "options": {
+      "A": "Gujarat",
+      "B": "Odisha",
+      "C": "Rajasthan",
+      "D": "Madhya Pradesh"
+    },
+    "ans": "B",
+    "explanation": "The Tropic of Cancer passes through 8 Indian states: Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram. It does not pass through Odisha.",
+    "subject": "Geography",
+    "topic": "General and Physical Geography",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "GEO_002",
+    "q": "The Godavari river enters Andhra Pradesh after flowing through Telangana at which of the following locations?",
+    "options": {
+      "A": "Bhadrachalam",
+      "B": "Polavaram",
+      "C": "Papi Hills (Konavaram)",
+      "D": "Dhavaleswaram"
+    },
+    "ans": "C",
+    "explanation": "The Godavari enters the state of Andhra Pradesh near the scenic Papi Kondalu range (Konavaram/Kunavaram) before breaking through the Eastern Ghats toward Polavaram.",
+    "subject": "Geography",
+    "topic": "India and Andhra Pradesh Geography",
+    "difficulty": "moderate",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "SOC_001",
+    "q": "Which constitutional amendment accorded constitutional status to the National Commission for Backward Classes (NCBC)?",
+    "options": {
+      "A": "100th Constitutional Amendment Act",
+      "B": "101st Constitutional Amendment Act",
+      "C": "102nd Constitutional Amendment Act",
+      "D": "103rd Constitutional Amendment Act"
+    },
+    "ans": "C",
+    "explanation": "The 102nd Constitutional Amendment Act, 2018 inserted Article 338B, granting constitutional status to the National Commission for Backward Classes.",
+    "subject": "Indian Society",
+    "topic": "Welfare Mechanism and Statutory Provisions",
+    "difficulty": "moderate",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "SOC_002",
+    "q": "The phenomenon where individuals from lower castes adopt the customs, rituals, and way of life of dominant castes is termed as:",
+    "options": {
+      "A": "Westernization",
+      "B": "Sanskritization",
+      "C": "Modernization",
+      "D": "Secularization"
+    },
+    "ans": "B",
+    "explanation": "Sociologist M.N. Srinivas coined the term 'Sanskritization' to describe the mobility process wherein lower castes adopt the rites, customs, and beliefs of higher castes.",
+    "subject": "Indian Society",
+    "topic": "Structure of Indian Society",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "CUR_001",
+    "q": "The G20 Leaders' Summit 2023 under India's presidency concluded with the unanimous adoption of the:",
+    "options": {
+      "A": "Bali Concord",
+      "B": "New Delhi Leaders' Declaration",
+      "C": "Johannesburg Protocol",
+      "D": "Riyadh Agreement"
+    },
+    "ans": "B",
+    "explanation": "The 18th G20 Heads of State and Government Summit held in New Delhi concluded with the consensus adoption of the New Delhi Leaders' Declaration.",
+    "subject": "Current Affairs",
+    "topic": "Major Current Events: International & National",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "MA_001",
+    "q": "In a code language, if 'LEMON' is coded as 'PWQSR', how will 'APPLE' be coded in the same pattern?",
+    "options": {
+      "A": "ETTPI",
+      "B": "ETTQI",
+      "C": "ESTPI",
+      "D": "FTTQI"
+    },
+    "ans": "A",
+    "explanation": "Each letter is shifted forward by 4 positions: A(+4)=E, P(+4)=T, P(+4)=T, L(+4)=P, E(+4)=I. Therefore, APPLE becomes ETTPI.",
+    "subject": "Mental Ability",
+    "topic": "Coding - Decoding",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "APH_001",
+    "q": "Who among the following wrote the celebrated classical Telugu prabandha 'Amuktamalyada'?",
+    "options": {
+      "A": "Allasani Peddana",
+      "B": "Sri Krishnadevaraya",
+      "C": "Tenali Ramakrishna",
+      "D": "Nannaya Bhattaraka"
+    },
+    "ans": "B",
+    "explanation": "Vijayanagara Emperor Sri Krishnadevaraya composed 'Amuktamalyada', an epic Telugu poem narrating the story of the Tamil Vaishnava saint Goda Devi (Andal).",
+    "subject": "Social and Cultural History of Andhra Pradesh",
+    "topic": "Vijayanagara Empire and Telugu Literature",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "CON_001",
+    "q": "Which Article of the Constitution of India empowers the Supreme Court to issue writs for the enforcement of Fundamental Rights?",
+    "options": {
+      "A": "Article 226",
+      "B": "Article 32",
+      "C": "Article 136",
+      "D": "Article 143"
+    },
+    "ans": "B",
+    "explanation": "Article 32 gives citizens the right to move the Supreme Court by appropriate proceedings for the enforcement of Fundamental Rights, famously termed by Dr. B.R. Ambedkar as the 'heart and soul' of the Constitution.",
+    "subject": "Indian Constitution",
+    "topic": "Fundamental Rights and Writs",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "ECO_001",
+    "q": "In the calculation of National Income, the difference between Gross Domestic Product (GDP) and Gross National Product (GNP) is:",
+    "options": {
+      "A": "Net Indirect Taxes",
+      "B": "Depreciation",
+      "C": "Net Factor Income from Abroad (NFIA)",
+      "D": "Subsidies"
+    },
+    "ans": "C",
+    "explanation": "GNP = GDP + Net Factor Income from Abroad (NFIA). NFIA accounts for the net flow of income received from abroad by normal residents.",
+    "subject": "Indian and AP Economy",
+    "topic": "National Income of India",
+    "difficulty": "moderate",
+    "marks": 1,
+    "negative_marks": 0.33
+  },
+  {
+    "id": "ST_001",
+    "q": "India's solar observatory mission positioned around the Sun-Earth Lagrange point L1 is named:",
+    "options": {
+      "A": "Chandrayaan-3",
+      "B": "Aditya-L1",
+      "C": "XPoSat",
+      "D": "AstroSat"
+    },
+    "ans": "B",
+    "explanation": "ISRO launched Aditya-L1 on September 2, 2023, India's first space-based solar observatory designed to study the solar corona and solar winds from the Sun-Earth L1 Lagrange point.",
+    "subject": "Science and Technology",
+    "topic": "Space Technology and Missions",
+    "difficulty": "easy",
+    "marks": 1,
+    "negative_marks": 0.33
+  }
+]

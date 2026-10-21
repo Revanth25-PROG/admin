@@ -21,6 +21,10 @@ import {
   Newspaper,
   Sliders,
   Boxes,
+  Upload,
+  CheckSquare,
+  Layers,
+  ShieldCheck,
 } from 'lucide-react';
 import { useStudyVerse } from '../../hooks/useStudyVerse';
 import { Card, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -135,71 +139,82 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* APPSC Studyverse Fast Launchpad */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <button
           onClick={() => navigate('/appsc')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Award size={18} />
+          <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <Award size={16} />
           </div>
           <span className="text-xs font-bold text-white group-hover:text-blue-300">9 Subjects</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">Official syllabus & mocks</span>
+          <span className="text-[10px] text-slate-400">Official syllabus</span>
         </button>
 
         <button
           onClick={() => navigate('/mains')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-violet-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-violet-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <PenTool size={18} />
+          <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <PenTool size={16} />
           </div>
           <span className="text-xs font-bold text-white group-hover:text-violet-300">Mains Lab</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">Word limits & rubrics</span>
+          <span className="text-[10px] text-slate-400">Word limits & rubrics</span>
         </button>
 
         <button
           onClick={() => navigate('/mistakes')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-rose-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-rose-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <AlertOctagon size={18} />
+          <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <AlertOctagon size={16} />
           </div>
           <span className="text-xs font-bold text-white group-hover:text-rose-300">Mistakes Book</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">Error root-cause & retry</span>
+          <span className="text-[10px] text-slate-400">Root-cause & retry</span>
         </button>
 
         <button
           onClick={() => navigate('/current-affairs')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Newspaper size={18} />
+          <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <Newspaper size={16} />
           </div>
           <span className="text-xs font-bold text-white group-hover:text-amber-300">Current Affairs</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">AP & National takeaways</span>
+          <span className="text-[10px] text-slate-400">AP & National news</span>
         </button>
 
         <button
           onClick={() => navigate('/mock-tests/configure')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Sliders size={18} />
+          <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <Sliders size={16} />
           </div>
-          <span className="text-xs font-bold text-white group-hover:text-cyan-300">Test Blueprint</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">Stage & difficulty mixer</span>
+          <span className="text-xs font-bold text-white group-hover:text-cyan-300">Blueprint</span>
+          <span className="text-[10px] text-slate-400">Difficulty mixer</span>
         </button>
 
         <button
           onClick={() => navigate('/admin/inventory')}
-          className="flex flex-col items-start p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Boxes size={18} />
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <Boxes size={16} />
           </div>
-          <span className="text-xs font-bold text-white group-hover:text-emerald-300">Mock Inventory</span>
-          <span className="text-[10px] text-slate-400 mt-0.5">Ready, Draft, Targets</span>
+          <span className="text-xs font-bold text-white group-hover:text-emerald-300">Inventory</span>
+          <span className="text-[10px] text-slate-400">Ready, Draft, Targets</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/admin/import')}
+          className="flex flex-col items-start p-3 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 transition-all text-left group cursor-pointer shadow-sm"
+        >
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+            <Upload size={16} />
+          </div>
+          <span className="text-xs font-bold text-white group-hover:text-indigo-300">JSON Audit</span>
+          <span className="text-[10px] text-slate-400">Import & validate</span>
         </button>
       </div>
 
@@ -302,6 +317,158 @@ export const DashboardPage: React.FC = () => {
             {semCompleted} of {semesterTopics.length} units completed
           </div>
         </Card>
+      </div>
+
+      {/* APPSC Group-II Official Nine-Section Examination Hub */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20">
+                Official APPSC Group-II Curriculum
+              </span>
+              <span className="text-xs text-slate-400">Degree Standard • Negative Marking: 1/3rd (-0.33)</span>
+            </div>
+            <h2 className="text-lg font-bold text-white tracking-tight mt-1">
+              Screening & Mains Nine Study Sections
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<Layers size={14} />}
+              onClick={() => navigate('/syllabus')}
+            >
+              Full Syllabus Matrix
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<CheckSquare size={14} />}
+              onClick={() => navigate('/mocks')}
+            >
+              Mock Test Centre
+            </Button>
+          </div>
+        </div>
+
+        {/* Screening Test Grid */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-blue-400 uppercase tracking-wider px-1">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} /> Screening Test (Preliminary) — 5 Sections • 150 Questions • 150 Marks • 150 Mins
+            </span>
+            <span className="text-[10px] text-slate-500 font-mono">30 Marks Each</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {subjects
+              .filter((s) => s.track === 'appsc-prelims' && !s.id.includes('general'))
+              .slice(0, 5)
+              .map((sub) => {
+                const subTopicsCount = topics.filter((t) => t.subjectId === sub.id).length;
+                return (
+                  <div
+                    key={sub.id}
+                    className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 transition-all flex flex-col justify-between group shadow-sm"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                          {sub.officialMarks || 30} Marks
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">{subTopicsCount} Units</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-2">
+                        {sub.name}
+                      </h4>
+                      {sub.nameTelugu && (
+                        <span className="text-[10px] text-slate-400 block mt-0.5 truncate">
+                          {sub.nameTelugu}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+                      <button
+                        onClick={() => navigate(`/subjects/${sub.id}`)}
+                        className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Syllabus</span>
+                        <ArrowRight size={12} />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/mock-tests?subjectId=${sub.id}`)}
+                        className="text-[10px] px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium cursor-pointer"
+                      >
+                        Mock
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+
+        {/* Mains Examination Grid */}
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center justify-between text-xs font-bold text-violet-400 uppercase tracking-wider px-1">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} /> Mains Examination — Paper I & Paper II • 300 Questions • 300 Marks • 300 Mins
+            </span>
+            <span className="text-[10px] text-slate-500 font-mono">75 Marks Each Section</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {subjects
+              .filter((s) => s.track === 'appsc-mains')
+              .slice(0, 4)
+              .map((sub) => {
+                const subTopicsCount = topics.filter((t) => t.subjectId === sub.id).length;
+                return (
+                  <div
+                    key={sub.id}
+                    className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-violet-500/40 transition-all flex flex-col justify-between group shadow-sm"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                          {sub.officialMarks || 75} Marks
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">{sub.paper?.split('(')[0] || 'Mains'}</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white group-hover:text-violet-300 transition-colors line-clamp-2">
+                        {sub.name}
+                      </h4>
+                      {sub.nameTelugu && (
+                        <span className="text-[10px] text-slate-400 block mt-0.5 truncate">
+                          {sub.nameTelugu}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+                      <button
+                        onClick={() => navigate(`/subjects/${sub.id}`)}
+                        className="text-[11px] font-semibold text-violet-400 hover:text-violet-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Syllabus Units ({subTopicsCount})</span>
+                        <ArrowRight size={12} />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/mock-tests?subjectId=${sub.id}`)}
+                        className="text-[10px] px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium cursor-pointer"
+                      >
+                        Mock
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
       </div>
 
       {/* Main Grid: Today's Tasks & Side Widgets */}

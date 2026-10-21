@@ -50,7 +50,10 @@ class StorageService {
           // Ensure all required fields exist
           const mergedSubjects = [...(parsed.subjects || [])];
           INITIAL_SAMPLE_DATA.subjects.forEach((s) => {
-            if (!mergedSubjects.some((x) => x.id === s.id)) {
+            const existingIdx = mergedSubjects.findIndex((x) => x.id === s.id);
+            if (existingIdx >= 0) {
+              mergedSubjects[existingIdx] = { ...mergedSubjects[existingIdx], ...s };
+            } else {
               mergedSubjects.push(s);
             }
           });

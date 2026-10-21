@@ -21,6 +21,7 @@ import {
   Boxes,
   KeyRound,
   Sliders,
+  Upload,
 } from 'lucide-react';
 import { useStudyVerse } from '../../hooks/useStudyVerse';
 
@@ -98,6 +99,7 @@ export const Sidebar: React.FC = () => {
       title: 'Admin & System',
       items: [
         { to: '/admin/question-bank', label: 'Question Bank Studio', icon: <Database size={17} /> },
+        { to: '/admin/import', label: 'JSON Audit & Import', icon: <Upload size={17} /> },
         { to: '/admin/inventory', label: 'Mock Inventory', icon: <Boxes size={17} /> },
         { to: '/calendar', label: 'Calendar & Deadlines', icon: <Calendar size={17} /> },
         { to: '/settings', label: 'Settings & Sync', icon: <Settings size={17} /> },

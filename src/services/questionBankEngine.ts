@@ -434,31 +434,61 @@ export function parseQuestionsFromJson(
 
     const validatedQuestions: BankQuestionItem[] = [];
     parsed.forEach((item, index) => {
+      const qText = (item.questionText || item.q || item.question || '').trim();
+
+      // Normalize options
+      let optionObjects: { id: string; text: string }[] = [];
+      if (item.options && typeof item.options === 'object' && !Array.isArray(item.options)) {
+        optionObjects = Object.entries(item.options).map(([k, v]) => ({
+          id: k.toUpperCase(),
+          text: String(v).trim(),
+        }));
+      } else if (Array.isArray(item.options)) {
+        optionObjects = item.options.map((opt: any, i: number) => {
+          if (typeof opt === 'object' && opt !== null) {
+            return { id: opt.id || ['A', 'B', 'C', 'D'][i] || `opt-${i + 1}`, text: String(opt.text || opt.label || '') };
+          }
+          return { id: ['A', 'B', 'C', 'D'][i] || `opt-${i + 1}`, text: String(opt).trim() };
+        });
+      } else {
+        optionObjects = [
+          { id: 'A', text: 'Option A' },
+          { id: 'B', text: 'Option B' },
+          { id: 'C', text: 'Option C' },
+          { id: 'D', text: 'Option D' },
+        ];
+      }
+
+      // Normalize correct answer
+      let correctOpt = String(item.correctAnswer || item.ans || 'A').trim();
+      const matched = optionObjects.find((o) => o.id.toUpperCase() === correctOpt.toUpperCase()) ||
+        optionObjects.find((o) => o.text.toLowerCase() === correctOpt.toLowerCase());
+      if (matched) {
+        correctOpt = matched.id;
+      }
+
       const q: BankQuestionItem = {
         id: item.id || `bq-imp-${Date.now()}-${index}`,
-        examTrack: item.examTrack || 'appsc-prelims',
-        subjectId: targetSubjectId || item.subjectId || 'sub-pre-group-1',
-        topicId: targetTopicId || item.topicId || 'top-hist-1',
+        examTrack: item.examTrack || (item.exam_stage === 'mains' ? 'appsc-mains' : 'appsc-prelims'),
+        subjectId: targetSubjectId || item.subjectId || item.subject || 'sub-appsc-1',
+        topicId: targetTopicId || item.topicId || item.topic || 'top-hist-1',
         questionType: item.questionType || 'single_correct',
-        questionText: item.questionText || '',
+        questionText: qText,
         questionTextTelugu: item.questionTextTelugu,
-        options: item.options || [
-          { id: 'opt-1', text: 'Option A' },
-          { id: 'opt-2', text: 'Option B' },
-        ],
-        correctAnswer: item.correctAnswer || 'opt-1',
-        explanation: item.explanation || 'Verified study explanation.',
+        options: optionObjects,
+        correctAnswer: correctOpt,
+        explanation: item.explanation || item.exp || 'Verified study explanation.',
         explanationTelugu: item.explanationTelugu,
         difficulty: item.difficulty || 'moderate',
         language: item.language || 'en',
         marks: Number(item.marks) || 1.0,
-        negativeMarks: Number(item.negativeMarks) || 0.33,
+        negativeMarks: Number(item.negative_marks ?? item.negativeMarks ?? 0.33),
         sourceType: item.sourceType || 'manual_entry',
         sourceReference: item.sourceReference || 'Imported Question Bank',
         keywords: item.keywords || ['Imported'],
         questionFingerprint:
           item.questionFingerprint ||
-          generateQuestionFingerprint(item.questionText || '', item.options || []),
+          generateQuestionFingerprint(qText, optionObjects),
         validationStatus: item.validationStatus || 'approved',
         publicationStatus: 'published',
         attemptCount: 0,
@@ -762,4 +792,471 @@ export function parseQuestionsFromPython(
   });
 
   return { questions: validatedQuestions, errors, duplicateCount };
+}
+
+export interface JsonValidationReport {
+  isValid: boolean;
+  totalParsed: number;
+  validCount: number;
+  invalidCount: number;
+  uniqueIdsCount: number;
+  duplicateIds: string[];
+  duplicateQuestions: { id: string; text: string; duplicateOfId?: string }[];
+  missingFields: { id: string; missing: string[] }[];
+  invalidOptionCounts: { id: string; count: number }[];
+  invalidAnswerKeys: { id: string; ans: string }[];
+  missingExplanations: { id: string }[];
+  sectionBreakdown: { sectionName: string; count: number; examStage: string }[];
+  questions: BankQuestionItem[];
+}
+
+/**
+ * Validates Section 5 JSON format with audit reports across all 9 sections
+ */
+export function validateAndReportMockTestsJson(
+  rawJson: string,
+  existingQuestions: BankQuestionItem[] = []
+): JsonValidationReport {
+  const duplicateIds: string[] = [];
+  const duplicateQuestions: { id: string; text: string; duplicateOfId?: string }[] = [];
+  const missingFields: { id: string; missing: string[] }[] = [];
+  const invalidOptionCounts: { id: string; count: number }[] = [];
+  const invalidAnswerKeys: { id: string; ans: string }[] = [];
+  const missingExplanations: { id: string }[] = [];
+  const sectionCounts: Record<string, { count: number; stage: string }> = {
+    'Indian History': { count: 0, stage: 'screening' },
+    'Geography': { count: 0, stage: 'screening' },
+    'Indian Society': { count: 0, stage: 'screening' },
+    'Current Affairs': { count: 0, stage: 'screening' },
+    'Mental Ability': { count: 0, stage: 'screening' },
+    'Social and Cultural History of Andhra Pradesh': { count: 0, stage: 'mains' },
+    'Indian Constitution': { count: 0, stage: 'mains' },
+    'Indian and AP Economy': { count: 0, stage: 'mains' },
+    'Science and Technology': { count: 0, stage: 'mains' },
+  };
+
+  const idSet = new Set<string>();
+  const seenFingerprints = new Map<string, string>();
+  existingQuestions.forEach((eq) => {
+    if (eq.questionFingerprint) seenFingerprints.set(eq.questionFingerprint, eq.id);
+  });
+
+  let rawList: any[] = [];
+  try {
+    const parsed = JSON.parse(rawJson);
+    if (Array.isArray(parsed)) {
+      rawList = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+      if (Array.isArray(parsed.quiz)) rawList = parsed.quiz;
+      else if (Array.isArray(parsed.questions)) rawList = parsed.questions;
+      else if (Array.isArray(parsed.mockTests)) rawList = parsed.mockTests;
+      else rawList = [parsed];
+    }
+  } catch (err) {
+    return {
+      isValid: false,
+      totalParsed: 0,
+      validCount: 0,
+      invalidCount: 0,
+      uniqueIdsCount: 0,
+      duplicateIds: [],
+      duplicateQuestions: [],
+      missingFields: [{ id: 'ROOT', missing: ['Valid JSON syntax required'] }],
+      invalidOptionCounts: [],
+      invalidAnswerKeys: [],
+      missingExplanations: [],
+      sectionBreakdown: [],
+      questions: [],
+    };
+  }
+
+  const validQuestions: BankQuestionItem[] = [];
+
+  rawList.forEach((item, idx) => {
+    const qId = String(item.id || `MUG_${idx + 1}`).trim();
+    const qText = String(item.q || item.question || item.questionText || '').trim();
+
+    // Check unique ID
+    if (idSet.has(qId)) {
+      duplicateIds.push(qId);
+    } else {
+      idSet.add(qId);
+    }
+
+    // Required fields check
+    const missing: string[] = [];
+    if (!item.id) missing.push('id');
+    if (!item.q && !item.questionText && !item.question) missing.push('q');
+    if (!item.options) missing.push('options');
+    if (!item.ans && !item.correctAnswer) missing.push('ans');
+    if (!item.explanation && !item.exp) missing.push('explanation');
+
+    if (missing.length > 0) {
+      missingFields.push({ id: qId, missing });
+    }
+
+    // Options normalization
+    let optionsArray: { id: string; text: string }[] = [];
+    if (item.options && typeof item.options === 'object' && !Array.isArray(item.options)) {
+      optionsArray = Object.entries(item.options).map(([k, v]) => ({
+        id: k.toUpperCase(),
+        text: String(v).trim(),
+      }));
+    } else if (Array.isArray(item.options)) {
+      optionsArray = item.options.map((opt: any, i: number) => {
+        if (typeof opt === 'object' && opt !== null) {
+          return { id: opt.id || ['A', 'B', 'C', 'D'][i] || `opt-${i + 1}`, text: String(opt.text || opt.label || '') };
+        }
+        return { id: ['A', 'B', 'C', 'D'][i] || `opt-${i + 1}`, text: String(opt).trim() };
+      });
+    }
+
+    // Check option count
+    if (optionsArray.length !== 4) {
+      invalidOptionCounts.push({ id: qId, count: optionsArray.length });
+    }
+
+    // Answer key check
+    const rawAns = String(item.ans || item.correctAnswer || '').trim();
+    let matchedOpt = optionsArray.find((o) => o.id.toUpperCase() === rawAns.toUpperCase());
+    if (!matchedOpt) {
+      matchedOpt = optionsArray.find((o) => o.text.toLowerCase() === rawAns.toLowerCase());
+    }
+
+    if (!matchedOpt && rawAns) {
+      invalidAnswerKeys.push({ id: qId, ans: rawAns });
+    }
+
+    // Explanation check
+    const explanationText = String(item.explanation || item.exp || '').trim();
+    if (!explanationText) {
+      missingExplanations.push({ id: qId });
+    }
+
+    // Fingerprint duplicate check
+    const fp = generateQuestionFingerprint(qText, optionsArray);
+    if (seenFingerprints.has(fp)) {
+      duplicateQuestions.push({
+        id: qId,
+        text: qText.slice(0, 70),
+        duplicateOfId: seenFingerprints.get(fp),
+      });
+    } else {
+      seenFingerprints.set(fp, qId);
+    }
+
+    // Syllabus section classification
+    const subStr = (item.subject || item.topic || '').toLowerCase();
+    let assignedSection = 'Indian History';
+    let assignedStage = 'screening';
+
+    if (subStr.includes('andhra') && (subStr.includes('history') || subStr.includes('culture') || subStr.includes('movement'))) {
+      assignedSection = 'Social and Cultural History of Andhra Pradesh';
+      assignedStage = 'mains';
+    } else if (subStr.includes('constitution') || subStr.includes('polity') || subStr.includes('governance')) {
+      assignedSection = 'Indian Constitution';
+      assignedStage = 'mains';
+    } else if (subStr.includes('economy') || subStr.includes('gdp') || subStr.includes('budget') || subStr.includes('gst') || subStr.includes('rbi')) {
+      assignedSection = 'Indian and AP Economy';
+      assignedStage = 'mains';
+    } else if (subStr.includes('science') || subStr.includes('technology') || subStr.includes('space') || subStr.includes('energy') || subStr.includes('bio')) {
+      assignedSection = 'Science and Technology';
+      assignedStage = 'mains';
+    } else if (subStr.includes('geography') || subStr.includes('monsoon') || subStr.includes('river') || subStr.includes('climate') || subStr.includes('soil')) {
+      assignedSection = 'Geography';
+      assignedStage = 'screening';
+    } else if (subStr.includes('society') || subStr.includes('caste') || subStr.includes('family') || subStr.includes('welfare') || subStr.includes('tribe')) {
+      assignedSection = 'Indian Society';
+      assignedStage = 'screening';
+    } else if (subStr.includes('current') || subStr.includes('affair') || subStr.includes('international') || subStr.includes('news')) {
+      assignedSection = 'Current Affairs';
+      assignedStage = 'screening';
+    } else if (subStr.includes('mental') || subStr.includes('reasoning') || subStr.includes('aptitude') || subStr.includes('math') || subStr.includes('number')) {
+      assignedSection = 'Mental Ability';
+      assignedStage = 'screening';
+    } else {
+      assignedSection = 'Indian History';
+      assignedStage = 'screening';
+    }
+
+    if (sectionCounts[assignedSection]) {
+      sectionCounts[assignedSection].count++;
+    }
+
+    // Construct valid question item
+    const isItemValid = missing.length === 0 && optionsArray.length >= 2 && matchedOpt !== undefined;
+
+    if (isItemValid) {
+      validQuestions.push({
+        id: qId,
+        examTrack: assignedStage === 'mains' ? 'appsc-mains' : 'appsc-prelims',
+        subjectId: item.subjectId || `sub-section-${assignedSection.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+        topicId: item.topicId || `top-${assignedSection.slice(0, 3).toLowerCase()}-1`,
+        questionType: 'single_correct',
+        questionText: qText,
+        options: optionsArray,
+        correctAnswer: matchedOpt ? matchedOpt.id : optionsArray[0]?.id || 'A',
+        explanation: explanationText || 'Verified competitive exam explanation.',
+        difficulty: (['easy', 'moderate', 'difficult', 'very_difficult', 'exam_tricky'].includes(item.difficulty)
+          ? item.difficulty
+          : 'moderate') as QuestionDifficulty,
+        language: item.language || 'en',
+        marks: Number(item.marks) || 1.0,
+        negativeMarks: Number(item.negative_marks ?? item.negativeMarks ?? 0.33),
+        sourceType: 'standard_book',
+        sourceReference: item.source_reference || 'APPSC Group-II Official Section Question Bank',
+        keywords: [assignedSection, item.topic || 'General Studies'],
+        questionFingerprint: fp,
+        validationStatus: 'approved',
+        publicationStatus: 'published',
+        attemptCount: 0,
+        correctAttemptCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  });
+
+  const sectionBreakdown = Object.entries(sectionCounts).map(([sectionName, data]) => ({
+    sectionName,
+    count: data.count,
+    examStage: data.stage,
+  }));
+
+  const isValid =
+    rawList.length > 0 &&
+    missingFields.length === 0 &&
+    invalidAnswerKeys.length === 0 &&
+    duplicateIds.length === 0 &&
+    invalidOptionCounts.length === 0;
+
+  return {
+    isValid,
+    totalParsed: rawList.length,
+    validCount: validQuestions.length,
+    invalidCount: rawList.length - validQuestions.length,
+    uniqueIdsCount: idSet.size,
+    duplicateIds,
+    duplicateQuestions,
+    missingFields,
+    invalidOptionCounts,
+    invalidAnswerKeys,
+    missingExplanations,
+    sectionBreakdown,
+    questions: validQuestions,
+  };
+}
+
+/**
+ * Returns authentic starter sample seed JSON covering all 9 syllabus sections
+ */
+export function getSampleSectionMockTestsJson(): string {
+  const sample = [
+    {
+      id: "HIST_001",
+      q: "Which inscription of Emperor Ashoka explicitly mentions his remorse over the Kalinga War?",
+      options: {
+        A: "Major Rock Edict VIII",
+        B: "Major Rock Edict XIII",
+        C: "Pillar Edict VII",
+        D: "Bhabru Edict"
+      },
+      ans: "B",
+      explanation: "Major Rock Edict XIII gives a vivid account of the Kalinga War (261 BCE), recording the casualties and Ashoka's profound grief and conversion to Dhamma Vijaya.",
+      subject: "Indian History",
+      topic: "Mauryan Empire",
+      difficulty: "moderate",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "HIST_002",
+      q: "Who among the following was the founder of the Satavahana dynasty in the Deccan?",
+      options: {
+        A: "Gautamiputra Satakarni",
+        B: "Simuka",
+        C: "Satakarni I",
+        D: "Yajna Sri Satakarni"
+      },
+      ans: "B",
+      explanation: "Simuka was the founder of the Satavahana dynasty after defeating the last Kanva king Susarman around late 1st century BCE.",
+      subject: "Indian History",
+      topic: "Ancient Indian History",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "GEO_001",
+      q: "Through which of the following states does the Tropic of Cancer (23.5° N) NOT pass in India?",
+      options: {
+        A: "Gujarat",
+        B: "Odisha",
+        C: "Rajasthan",
+        D: "Madhya Pradesh"
+      },
+      ans: "B",
+      explanation: "The Tropic of Cancer passes through 8 Indian states: Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram. It does not pass through Odisha.",
+      subject: "Geography",
+      topic: "General and Physical Geography",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "GEO_002",
+      q: "The Godavari river enters Andhra Pradesh after flowing through Telangana at which of the following locations?",
+      options: {
+        A: "Bhadrachalam",
+        B: "Polavaram",
+        C: "Papi Hills (Konavaram)",
+        D: "Dhavaleswaram"
+      },
+      ans: "C",
+      explanation: "The Godavari enters the state of Andhra Pradesh near the scenic Papi Kondalu range (Konavaram/Kunavaram) before breaking through the Eastern Ghats toward Polavaram.",
+      subject: "Geography",
+      topic: "India and Andhra Pradesh Geography",
+      difficulty: "moderate",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "SOC_001",
+      q: "Which constitutional amendment accorded constitutional status to the National Commission for Backward Classes (NCBC)?",
+      options: {
+        A: "100th Constitutional Amendment Act",
+        B: "101st Constitutional Amendment Act",
+        C: "102nd Constitutional Amendment Act",
+        D: "103rd Constitutional Amendment Act"
+      },
+      ans: "C",
+      explanation: "The 102nd Constitutional Amendment Act, 2018 inserted Article 338B, granting constitutional status to the National Commission for Backward Classes.",
+      subject: "Indian Society",
+      topic: "Welfare Mechanism and Statutory Provisions",
+      difficulty: "moderate",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "SOC_002",
+      q: "The phenomenon where individuals from lower castes adopt the customs, rituals, and way of life of dominant castes is termed as:",
+      options: {
+        A: "Westernization",
+        B: "Sanskritization",
+        C: "Modernization",
+        D: "Secularization"
+      },
+      ans: "B",
+      explanation: "Sociologist M.N. Srinivas coined the term 'Sanskritization' to describe the mobility process wherein lower castes adopt the rites, customs, and beliefs of higher castes.",
+      subject: "Indian Society",
+      topic: "Structure of Indian Society",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "CUR_001",
+      q: "The G20 Leaders' Summit 2023 under India's presidency concluded with the unanimous adoption of the:",
+      options: {
+        A: "Bali Concord",
+        B: "New Delhi Leaders' Declaration",
+        C: "Johannesburg Protocol",
+        D: "Riyadh Agreement"
+      },
+      ans: "B",
+      explanation: "The 18th G20 Heads of State and Government Summit held in New Delhi concluded with the consensus adoption of the New Delhi Leaders' Declaration.",
+      subject: "Current Affairs",
+      topic: "Major Current Events: International & National",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "MA_001",
+      q: "In a code language, if 'LEMON' is coded as 'PWQSR', how will 'APPLE' be coded in the same pattern?",
+      options: {
+        A: "ETTPI",
+        B: "ETTQI",
+        C: "ESTPI",
+        D: "FTTQI"
+      },
+      ans: "A",
+      explanation: "Each letter is shifted forward by 4 positions: A(+4)=E, P(+4)=T, P(+4)=T, L(+4)=P, E(+4)=I. Therefore, APPLE becomes ETTPI.",
+      subject: "Mental Ability",
+      topic: "Coding - Decoding",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "APH_001",
+      q: "Who among the following wrote the celebrated classical Telugu prabandha 'Amuktamalyada'?",
+      options: {
+        A: "Allasani Peddana",
+        B: "Sri Krishnadevaraya",
+        C: "Tenali Ramakrishna",
+        D: "Nannaya Bhattaraka"
+      },
+      ans: "B",
+      explanation: "Vijayanagara Emperor Sri Krishnadevaraya composed 'Amuktamalyada', an epic Telugu poem narrating the story of the Tamil Vaishnava saint Goda Devi (Andal).",
+      subject: "Social and Cultural History of Andhra Pradesh",
+      topic: "Vijayanagara Empire and Telugu Literature",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "CON_001",
+      q: "Which Article of the Constitution of India empowers the Supreme Court to issue writs for the enforcement of Fundamental Rights?",
+      options: {
+        A: "Article 226",
+        B: "Article 32",
+        C: "Article 136",
+        D: "Article 143"
+      },
+      ans: "B",
+      explanation: "Article 32 gives citizens the right to move the Supreme Court by appropriate proceedings for the enforcement of Fundamental Rights, famously termed by Dr. B.R. Ambedkar as the 'heart and soul' of the Constitution.",
+      subject: "Indian Constitution",
+      topic: "Fundamental Rights and Writs",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "ECO_001",
+      q: "In the calculation of National Income, the difference between Gross Domestic Product (GDP) and Gross National Product (GNP) is:",
+      options: {
+        A: "Net Indirect Taxes",
+        B: "Depreciation",
+        C: "Net Factor Income from Abroad (NFIA)",
+        D: "Subsidies"
+      },
+      ans: "C",
+      explanation: "GNP = GDP + Net Factor Income from Abroad (NFIA). NFIA accounts for the net flow of income received from abroad by normal residents.",
+      subject: "Indian and AP Economy",
+      topic: "National Income of India",
+      difficulty: "moderate",
+      marks: 1,
+      negative_marks: 0.33
+    },
+    {
+      id: "ST_001",
+      q: "India's solar observatory mission positioned around the Sun-Earth Lagrange point L1 is named:",
+      options: {
+        A: "Chandrayaan-3",
+        B: "Aditya-L1",
+        C: "XPoSat",
+        D: "AstroSat"
+      },
+      ans: "B",
+      explanation: "ISRO launched Aditya-L1 on September 2, 2023, India's first space-based solar observatory designed to study the solar corona and solar winds from the Sun-Earth L1 Lagrange point.",
+      subject: "Science and Technology",
+      topic: "Space Technology and Missions",
+      difficulty: "easy",
+      marks: 1,
+      negative_marks: 0.33
+    }
+  ];
+
+  return JSON.stringify(sample, null, 2);
 }
